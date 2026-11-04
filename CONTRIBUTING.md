@@ -39,6 +39,12 @@ uv run pytest                 # тесты
 
 Настройки инструментов хранятся в `pyproject.toml`, версии закреплены в `uv.lock` (`uv sync` устанавливает их).
 
+### Обязательные проверки GitHub Actions
+
+Workflow `Code quality` запускает `Ruff lint`, `Ruff format` и `Mypy` для PR
+в `main` и `test`, push в эти ветки и merge queue. Ошибка любой проверки
+приводит к падению workflow. Проверки не исправляют код автоматически.
+
 ## Code Review
 
 - Каждый MR требует минимум 1 approval от другого участника команды
