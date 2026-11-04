@@ -33,9 +33,6 @@ jobs:
           version: "0.13.7"
           enable-cache: true
 
-      - name: test database
-        run: echo "$DB_USER" && echo "$DB_HOST"
-
       - name: Install Python
         run: uv python install
 
