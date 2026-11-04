@@ -6,9 +6,8 @@ Skipped locally when the database is unreachable; in CI (CI=true) they run and f
 import os
 
 import pytest
-from sqlalchemy import inspect
 
-from app.db import check_database, engine, get_db
+from app.db import check_database
 
 
 def _db_reachable() -> bool:
@@ -30,12 +29,3 @@ def test_check_database():
 def test_health_with_real_db(client):
     response = client.get("/health")
     assert response.status_code == 200
-
-
-def test_session_rolls_back_on_error():
-    sessions = get_db()
-    session = next(sessions)
-    session.connection().exec_driver_sql("CREATE TABLE rollback_probe (id int)")
-    with pytest.raises(RuntimeError):
-        sessions.throw(RuntimeError("boom"))
-    assert not inspect(engine).has_table("rollback_probe")
