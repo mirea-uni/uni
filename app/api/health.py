@@ -17,4 +17,6 @@ async def health() -> JSONResponse:
         db_ok = False
     if db_ok:
         return JSONResponse(status_code=200, content={"status": "ok", "database": "ok"})
-    return JSONResponse(status_code=503, content={"status": "unavailable", "database": "unavailable"})
+    return JSONResponse(
+        status_code=503, content={"status": "unavailable", "database": "unavailable"}
+    )

@@ -35,6 +35,8 @@ def test_unhandled_error_hides_traceback():
 
     response = TestClient(app, raise_server_exceptions=False).get("/boom")
     assert response.status_code == 500
-    assert response.json() == {"error": {"code": "internal_error", "message": "Internal server error"}}
+    assert response.json() == {
+        "error": {"code": "internal_error", "message": "Internal server error"}
+    }
     assert "secret" not in response.text
     assert "Traceback" not in response.text

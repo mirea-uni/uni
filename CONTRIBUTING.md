@@ -26,6 +26,19 @@ feat(auth): add login endpoint
 Refs: UNI-12
 ```
 
+## Проверки кода
+
+Перед открытием PR все проверки должны проходить:
+
+```bash
+uv run ruff check .           # линтер (автоисправление: uv run ruff check --fix .)
+uv run ruff format --check .  # форматирование (исправить: uv run ruff format .)
+uv run mypy                   # типы
+uv run pytest                 # тесты
+```
+
+Настройки инструментов хранятся в `pyproject.toml`, версии закреплены в `uv.lock` (`uv sync` устанавливает их).
+
 ## Code Review
 
 - Каждый MR требует минимум 1 approval от другого участника команды
