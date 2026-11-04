@@ -1,18 +1,15 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
+from app.db import check_database
+
 router = APIRouter(tags=["health"])
 
 
-async def check_database() -> bool:
-    # TODO(UNI-13): replace with a real DB ping once SQLAlchemy is wired up.
-    return True
-
-
 @router.get("/health")
-async def health() -> JSONResponse:
+def health() -> JSONResponse:
     try:
-        db_ok = await check_database()
+        db_ok = check_database()
     except Exception:
         db_ok = False
     if db_ok:

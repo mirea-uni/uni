@@ -6,6 +6,7 @@ Backend for a co-ownership property platform (FastAPI).
 
 - Python 3.14+
 - [uv](https://docs.astral.sh/uv/)
+- A reachable PostgreSQL database
 
 ## Setup
 
@@ -27,6 +28,14 @@ uv run fastapi dev app/main.py
 
 Settings are read from environment variables or `.env` via pydantic-settings (`app/core/config.py`). See `.env.example`.
 
+| Variable | Meaning | Default |
+|---|---|---|
+| `ENV` | where the app runs: `prod`, `test` (server/CI) or `dev` (local) | `dev` |
+| `DB_HOST`, `DB_PORT`, `DB_NAME` | PostgreSQL location | `localhost`, `5432`, `uni` |
+| `DB_USER`, `DB_PASSWORD` | PostgreSQL credentials | `postgres`, empty |
+
+On servers and in CI these are set in the environment. Locally, put them in `.env` (never commit it).
+
 ## Error format
 
 All errors are returned as JSON without tracebacks or internal details:
@@ -42,6 +51,9 @@ Validation errors (`422`) also include `details` with the failing fields.
 ```bash
 uv run pytest
 ```
+
+Database integration tests (`tests/test_db.py`) are skipped automatically when PostgreSQL
+is not reachable.
 
 GitHub Actions runs the `Tests` check on pushes to `main`, pull requests, and merge queue
 updates using the Python version from `.python-version` and dependencies from
@@ -71,9 +83,10 @@ so that they only run after tests pass.
 
 ```
 app/
-  main.py         # app factory, routers, exception handlers
+  main.py         # app, routers, exception handlers
   api/health.py   # /health endpoint
   core/config.py  # settings
   core/errors.py  # unified error responses
+  db.py           # SQLAlchemy engine, sessions, DB check
 tests/
 ```
