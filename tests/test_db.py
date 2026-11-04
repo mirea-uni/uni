@@ -1,4 +1,9 @@
-"""Integration tests: need a reachable PostgreSQL (DB_* in env or .env), otherwise skipped."""
+"""Integration tests: need a reachable PostgreSQL (DB_* in env or .env).
+
+Skipped locally when the database is unreachable; in CI (CI=true) they run and fail instead.
+"""
+
+import os
 
 import pytest
 from sqlalchemy import inspect
@@ -13,7 +18,9 @@ def _db_reachable() -> bool:
         return False
 
 
-pytestmark = pytest.mark.skipif(not _db_reachable(), reason="database not reachable")
+pytestmark = pytest.mark.skipif(
+    not os.getenv("CI") and not _db_reachable(), reason="database not reachable"
+)
 
 
 def test_check_database():
