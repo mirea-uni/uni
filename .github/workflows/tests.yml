@@ -36,6 +36,9 @@ jobs:
       - name: Run tests
         run: uv run pytest --junitxml=test-results.xml
 
+      - name: test database ci vars
+        run: echo $DB_HOST
+
       - name: Publish test report
         if: ${{ !cancelled() && hashFiles('test-results.xml') != '' }}
         uses: dorny/test-reporter@v3
