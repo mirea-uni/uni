@@ -14,9 +14,15 @@ jobs:
   tests:
     name: Tests
     runs-on: ubuntu-latest
+    environment: test
     timeout-minutes: 10
     env:
       UV_LOCKED: "true"
+      DB_HOST: ${{ vars.DB_HOST }}
+      DB_PORT: ${{ vars.DB_PORT }}
+      DB_NAME: ${{ vars.DB_NAME }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -26,6 +32,9 @@ jobs:
         with:
           version: "0.13.7"
           enable-cache: true
+
+      - name: test database
+        run: echo "$DB_USER" && echo "$DB_HOST"
 
       - name: Install Python
         run: uv python install
