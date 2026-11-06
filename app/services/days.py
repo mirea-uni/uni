@@ -2,6 +2,8 @@ import calendar
 
 
 def allocate_days(year: int, month: int, shares: dict[str, int]) -> dict[str, int]:
+    if not shares:
+        raise ValueError("property has no owners")
     if any(share < 0 for share in shares.values()):
         raise ValueError("share cannot be negative")
     if sum(shares.values()) != 100:
