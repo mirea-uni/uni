@@ -75,3 +75,8 @@ def test_allocate_whole_year():
 def test_year_totals():
     assert year_totals(2026, {"anna": 100}) == {"anna": 365}
     assert year_totals(2028, {"anna": 100}) == {"anna": 366}
+
+
+def test_extra_days_rotate_between_equal_owners():
+    # 7 months have 31 days, the extra day must not always go to the same person
+    assert year_totals(2026, {"anna": 50, "boris": 50}) == {"anna": 183, "boris": 182}
