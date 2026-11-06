@@ -2,7 +2,7 @@ from decimal import Decimal
 
 import pytest
 
-from app.services.days import allocate_days
+from app.services.days import allocate_days, allocate_year
 
 
 def test_single_owner_gets_all_days():
@@ -64,3 +64,9 @@ def test_blocked_days_more_than_month():
 def test_negative_blocked_days():
     with pytest.raises(ValueError, match="blocked"):
         allocate_days(2026, 11, {"anna": 100}, blocked_days=-1)
+
+
+def test_allocate_whole_year():
+    year = allocate_year(2026, {"anna": 100})
+    assert list(year) == list(range(1, 13))
+    assert year[2] == {"anna": 28}
