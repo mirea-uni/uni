@@ -14,9 +14,11 @@ def _check_shares(shares: Mapping[str, Share]) -> None:
         raise ValueError("shares must sum to 100")
 
 
-def allocate_days(year: int, month: int, shares: Mapping[str, Share]) -> dict[str, int]:
+def allocate_days(
+    year: int, month: int, shares: Mapping[str, Share], blocked_days: int = 0
+) -> dict[str, int]:
     _check_shares(shares)
-    days = calendar.monthrange(year, month)[1]
+    days = calendar.monthrange(year, month)[1] - blocked_days
     result = {owner: int(days * share // 100) for owner, share in shares.items()}
     # leftover days go to owners with the biggest fractional part,
     # if it is equal - to the owner with the bigger share
