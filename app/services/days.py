@@ -1,13 +1,17 @@
 import calendar
 
 
-def allocate_days(year: int, month: int, shares: dict[str, int]) -> dict[str, int]:
+def _check_shares(shares: dict[str, int]) -> None:
     if not shares:
         raise ValueError("property has no owners")
     if any(share < 0 for share in shares.values()):
         raise ValueError("share cannot be negative")
     if sum(shares.values()) != 100:
         raise ValueError("shares must sum to 100")
+
+
+def allocate_days(year: int, month: int, shares: dict[str, int]) -> dict[str, int]:
+    _check_shares(shares)
     days = calendar.monthrange(year, month)[1]
     result = {owner: days * share // 100 for owner, share in shares.items()}
     # leftover days go to owners with the biggest fractional part,
