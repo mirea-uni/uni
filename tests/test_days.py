@@ -35,3 +35,8 @@ def test_shares_must_sum_to_100():
 def test_negative_share_is_not_allowed():
     with pytest.raises(ValueError, match="negative"):
         allocate_days(2026, 11, {"anna": 120, "boris": -20})
+
+
+def test_property_without_owners():
+    with pytest.raises(ValueError, match="no owners"):
+        allocate_days(2026, 11, {})
