@@ -34,7 +34,14 @@ def allocate_days(
 
 
 def allocate_year(year: int, shares: Mapping[str, Share]) -> dict[int, dict[str, int]]:
-    return {month: allocate_days(year, month, shares) for month in range(1, 13)}
+    owners = list(shares)
+    result = {}
+    for month in range(1, 13):
+        # change owners order every month, so on a tie the extra day goes to different people
+        shift = (month - 1) % len(owners)
+        rotated = {owner: shares[owner] for owner in owners[shift:] + owners[:shift]}
+        result[month] = allocate_days(year, month, rotated)
+    return result
 
 
 def year_totals(year: int, shares: Mapping[str, Share]) -> dict[str, int]:
