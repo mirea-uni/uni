@@ -2,7 +2,7 @@ from decimal import Decimal
 
 import pytest
 
-from app.services.days import allocate_days, allocate_year
+from app.services.days import allocate_days, allocate_year, year_totals
 
 
 def test_single_owner_gets_all_days():
@@ -70,3 +70,8 @@ def test_allocate_whole_year():
     year = allocate_year(2026, {"anna": 100})
     assert list(year) == list(range(1, 13))
     assert year[2] == {"anna": 28}
+
+
+def test_year_totals():
+    assert year_totals(2026, {"anna": 100}) == {"anna": 365}
+    assert year_totals(2028, {"anna": 100}) == {"anna": 366}
