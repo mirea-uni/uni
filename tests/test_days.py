@@ -59,3 +59,8 @@ def test_blocked_days_are_not_distributed():
 def test_blocked_days_more_than_month():
     with pytest.raises(ValueError, match="blocked"):
         allocate_days(2026, 11, {"anna": 100}, blocked_days=31)
+
+
+def test_negative_blocked_days():
+    with pytest.raises(ValueError, match="blocked"):
+        allocate_days(2026, 11, {"anna": 100}, blocked_days=-1)
