@@ -34,7 +34,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function login(email: string, password: string) {
     const token = await authApi.login(email, password)
     setToken(token)
-    setUser(await authApi.getMe())
+    try {
+      setUser(await authApi.getMe())
+    } catch (err) {
+      setToken(null)
+      throw err
+    }
   }
 
   async function register(email: string, password: string) {
