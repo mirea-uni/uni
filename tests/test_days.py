@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import pytest
 
 from app.services.days import allocate_days
@@ -40,3 +42,10 @@ def test_negative_share_is_not_allowed():
 def test_property_without_owners():
     with pytest.raises(ValueError, match="no owners"):
         allocate_days(2026, 11, {})
+
+
+def test_fractional_shares():
+    shares = {"anna": Decimal("33.33"), "boris": Decimal("33.33"), "vera": Decimal("33.34")}
+    result = allocate_days(2026, 11, shares)
+    assert result == {"anna": 10, "boris": 10, "vera": 10}
+    assert all(type(days) is int for days in result.values())
