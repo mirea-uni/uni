@@ -31,3 +31,7 @@ def allocate_days(
     for owner in order[:left]:
         result[owner] += 1
     return result
+
+
+def allocate_year(year: int, shares: Mapping[str, Share]) -> dict[int, dict[str, int]]:
+    return {month: allocate_days(year, month, shares) for month in range(1, 13)}
