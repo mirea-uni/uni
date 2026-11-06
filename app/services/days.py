@@ -35,3 +35,11 @@ def allocate_days(
 
 def allocate_year(year: int, shares: Mapping[str, Share]) -> dict[int, dict[str, int]]:
     return {month: allocate_days(year, month, shares) for month in range(1, 13)}
+
+
+def year_totals(year: int, shares: Mapping[str, Share]) -> dict[str, int]:
+    totals = dict.fromkeys(shares, 0)
+    for month_result in allocate_year(year, shares).values():
+        for owner, days in month_result.items():
+            totals[owner] += days
+    return totals
