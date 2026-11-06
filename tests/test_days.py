@@ -30,3 +30,8 @@ def test_tie_goes_to_bigger_share():
 def test_shares_must_sum_to_100():
     with pytest.raises(ValueError, match="100"):
         allocate_days(2026, 11, {"anna": 60, "boris": 30})
+
+
+def test_negative_share_is_not_allowed():
+    with pytest.raises(ValueError, match="negative"):
+        allocate_days(2026, 11, {"anna": 120, "boris": -20})
