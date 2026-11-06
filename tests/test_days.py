@@ -18,3 +18,8 @@ def test_all_days_are_distributed():
     result = allocate_days(2026, 12, {"anna": 34, "boris": 33, "vera": 33})
     assert sum(result.values()) == 31
     assert result == {"anna": 11, "boris": 10, "vera": 10}
+
+
+def test_tie_goes_to_bigger_share():
+    result = allocate_days(2026, 11, {"anna": 15, "boris": 35, "vera": 50})
+    assert result == {"anna": 4, "boris": 11, "vera": 15}
