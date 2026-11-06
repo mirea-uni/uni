@@ -1,7 +1,10 @@
 import calendar
+from decimal import Decimal
+
+Share = int | Decimal
 
 
-def _check_shares(shares: dict[str, int]) -> None:
+def _check_shares(shares: dict[str, Share]) -> None:
     if not shares:
         raise ValueError("property has no owners")
     if any(share < 0 for share in shares.values()):
@@ -10,10 +13,10 @@ def _check_shares(shares: dict[str, int]) -> None:
         raise ValueError("shares must sum to 100")
 
 
-def allocate_days(year: int, month: int, shares: dict[str, int]) -> dict[str, int]:
+def allocate_days(year: int, month: int, shares: dict[str, Share]) -> dict[str, int]:
     _check_shares(shares)
     days = calendar.monthrange(year, month)[1]
-    result = {owner: days * share // 100 for owner, share in shares.items()}
+    result = {owner: int(days * share // 100) for owner, share in shares.items()}
     # leftover days go to owners with the biggest fractional part,
     # if it is equal - to the owner with the bigger share
     remainders = {owner: days * share % 100 for owner, share in shares.items()}
