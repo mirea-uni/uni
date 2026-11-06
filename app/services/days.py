@@ -1,2 +1,6 @@
+import calendar
+
+
 def allocate_days(year: int, month: int, shares: dict[str, int]) -> dict[str, int]:
-    return {owner: 30 for owner in shares}
+    days = calendar.monthrange(year, month)[1]
+    return {owner: days for owner in shares}
