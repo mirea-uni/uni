@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     authApi
       .getMe()
       .then(setUser)
-      .catch(() => setToken(null))
+      .catch(() => setUser(null))
       .finally(() => setLoading(false))
   }, [])
 
