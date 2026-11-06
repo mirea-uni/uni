@@ -54,3 +54,8 @@ def test_fractional_shares():
 def test_blocked_days_are_not_distributed():
     result = allocate_days(2026, 11, {"anna": 50, "boris": 50}, blocked_days=2)
     assert result == {"anna": 14, "boris": 14}
+
+
+def test_blocked_days_more_than_month():
+    with pytest.raises(ValueError, match="blocked"):
+        allocate_days(2026, 11, {"anna": 100}, blocked_days=31)
