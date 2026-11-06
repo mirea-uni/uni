@@ -2,6 +2,8 @@ import calendar
 
 
 def allocate_days(year: int, month: int, shares: dict[str, int]) -> dict[str, int]:
+    if sum(shares.values()) != 100:
+        raise ValueError("shares must sum to 100")
     days = calendar.monthrange(year, month)[1]
     result = {owner: days * share // 100 for owner, share in shares.items()}
     # leftover days go to owners with the biggest fractional part,
