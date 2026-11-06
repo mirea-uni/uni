@@ -1,10 +1,11 @@
 import calendar
+from collections.abc import Mapping
 from decimal import Decimal
 
 Share = int | Decimal
 
 
-def _check_shares(shares: dict[str, Share]) -> None:
+def _check_shares(shares: Mapping[str, Share]) -> None:
     if not shares:
         raise ValueError("property has no owners")
     if any(share < 0 for share in shares.values()):
@@ -13,7 +14,7 @@ def _check_shares(shares: dict[str, Share]) -> None:
         raise ValueError("shares must sum to 100")
 
 
-def allocate_days(year: int, month: int, shares: dict[str, Share]) -> dict[str, int]:
+def allocate_days(year: int, month: int, shares: Mapping[str, Share]) -> dict[str, int]:
     _check_shares(shares)
     days = calendar.monthrange(year, month)[1]
     result = {owner: int(days * share // 100) for owner, share in shares.items()}
