@@ -1,3 +1,5 @@
+"""Distribution of available days between co-owners of a property."""
+
 import calendar
 from collections.abc import Mapping
 from decimal import Decimal
@@ -17,6 +19,7 @@ def _check_shares(shares: Mapping[str, Share]) -> None:
 def allocate_days(
     year: int, month: int, shares: Mapping[str, Share], blocked_days: int = 0
 ) -> dict[str, int]:
+    """Split days of the month between owners proportionally to their shares (in percent)."""
     _check_shares(shares)
     month_days = calendar.monthrange(year, month)[1]
     if not 0 <= blocked_days <= month_days:
@@ -34,8 +37,9 @@ def allocate_days(
 
 
 def allocate_year(year: int, shares: Mapping[str, Share]) -> dict[int, dict[str, int]]:
+    _check_shares(shares)
     owners = list(shares)
-    result = {}
+    result: dict[int, dict[str, int]] = {}
     for month in range(1, 13):
         # change owners order every month, so on a tie the extra day goes to different people
         shift = (month - 1) % len(owners)
