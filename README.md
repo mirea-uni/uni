@@ -21,6 +21,12 @@ cp .env.example .env   # adjust values if needed
 uv run fastapi dev app/main.py
 ```
 
+Apply database migrations with:
+
+```bash
+uv run alembic upgrade head
+```
+
 - API docs: http://127.0.0.1:8000/docs (Swagger), http://127.0.0.1:8000/redoc
 - Health check: `GET /health` → `200 {"status": "ok", "database": "ok"}`, or `503` when the database is unavailable
 
