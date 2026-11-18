@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     app_name: str = "uni"
     env: str = "dev"
     debug: bool = False
+    auth_secret: str = "change-me-in-production"
+    auth_token_ttl: int = 3600
 
     db_host: str = "localhost"
     db_port: int = 5432
