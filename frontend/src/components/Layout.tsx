@@ -7,13 +7,17 @@ function Layout() {
   return (
     <div className="layout">
       <header className="header">
-        <span className="logo">Квиты</span>
+        <NavLink to="/" className="logo">
+          <span className="logo-mark" aria-hidden="true" />
+          Квиты
+        </NavLink>
         <nav className="nav">
           {user ? (
             <>
               <NavLink to="/" end>
                 Главная
               </NavLink>
+              <NavLink to="/properties">Имущество</NavLink>
               <span className="user-email">{user.email}</span>
               <button type="button" className="link-button" onClick={logout}>
                 Выйти
