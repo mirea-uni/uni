@@ -50,7 +50,7 @@ function PropertiesPage() {
               <li key={p.id}>
                 <Link to={`/properties/${p.id}`} className="property-item">
                   {p.photo_url ? <img src={p.photo_url} alt="" /> : <div className="no-photo">нет фото</div>}
-                  <div>
+                  <div className="property-info">
                     <strong>{p.name}</strong>
                     <span>{p.address}</span>
                   </div>

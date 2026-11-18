@@ -193,6 +193,7 @@ a {
 
 .no-photo {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   background: #f3f4f6;
@@ -200,7 +201,7 @@ a {
   font-size: 12px;
 }
 
-.property-item div {
+.property-info {
   display: flex;
   flex: 1;
   flex-direction: column;
