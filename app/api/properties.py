@@ -64,6 +64,7 @@ def create_property(
     property = Property(**payload.model_dump())
     session.add(property)
     session.flush()
+    session.refresh(property)
     session.add(Ownership(property_id=property.id, user_id=user.id, share=100))
     session.add(
         AuditEvent(
