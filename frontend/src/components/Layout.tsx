@@ -14,6 +14,7 @@ function Layout() {
               <NavLink to="/" end>
                 Главная
               </NavLink>
+              <NavLink to="/properties">Имущество</NavLink>
               <span className="user-email">{user.email}</span>
               <button type="button" className="link-button" onClick={logout}>
                 Выйти

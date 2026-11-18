@@ -1,3 +1,4 @@
+import { Link } from 'react-router'
 import { useAuth } from '../auth/useAuth.ts'
 
 function HomePage() {
@@ -8,6 +9,7 @@ function HomePage() {
       <h1>Квиты</h1>
       <p>Платформа для совместного владения имуществом.</p>
       {user && <p>Вы вошли как {user.email}</p>}
+      <Link to="/properties">Перейти к имуществу →</Link>
     </section>
   )
 }
