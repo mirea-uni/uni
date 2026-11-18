@@ -35,7 +35,8 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     response = await fetch(`${API_URL}${path}`, {
       ...init,
       headers: {
-        'Content-Type': 'application/json',
+        // для FormData (загрузка фото) браузер сам ставит Content-Type с boundary
+        ...(init?.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...init?.headers,
       },
@@ -58,4 +59,8 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     return undefined as T
   }
   return response.json() as Promise<T>
+}
+
+export function errorMessage(err: unknown, fallback = 'Что-то пошло не так'): string {
+  return err instanceof ApiError ? err.message : fallback
 }
