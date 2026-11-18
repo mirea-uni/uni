@@ -1,5 +1,5 @@
-import { ApiError, getToken } from './client.ts'
-import type { User } from './auth.ts'
+import { ApiError } from './client.ts'
+import type { Session } from './auth.ts'
 
 const USERS_KEY = 'mock_users'
 
@@ -11,7 +11,11 @@ function delay() {
   return new Promise((resolve) => setTimeout(resolve, 300))
 }
 
-export async function register(email: string, password: string): Promise<User> {
+function session(email: string): Session {
+  return { access_token: `mock.${btoa(email)}`, user: { id: Object.keys(loadUsers()).indexOf(email) + 1, email } }
+}
+
+export async function register(email: string, password: string): Promise<Session> {
   await delay()
   const users = loadUsers()
   if (users[email]) {
@@ -19,23 +23,13 @@ export async function register(email: string, password: string): Promise<User> {
   }
   users[email] = password
   localStorage.setItem(USERS_KEY, JSON.stringify(users))
-  return { id: Object.keys(users).length, email }
+  return session(email)
 }
 
-export async function login(email: string, password: string): Promise<string> {
+export async function login(email: string, password: string): Promise<Session> {
   await delay()
   if (loadUsers()[email] !== password) {
     throw new ApiError(401, 'Неверный email или пароль')
   }
-  return `mock.${btoa(email)}`
-}
-
-export async function getMe(): Promise<User> {
-  await delay()
-  const token = getToken()
-  const email = token?.startsWith('mock.') ? atob(token.slice(5)) : null
-  if (!email || !loadUsers()[email]) {
-    throw new ApiError(401, 'Сессия истекла')
-  }
-  return { id: 1, email }
+  return session(email)
 }

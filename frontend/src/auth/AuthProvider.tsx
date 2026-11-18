@@ -4,51 +4,51 @@ import * as authApi from '../api/auth.ts'
 import { getToken, setToken, setUnauthorizedHandler } from '../api/client.ts'
 import { AuthContext } from './AuthContext.ts'
 
+const USER_KEY = 'user'
+
+// у бэка нет /auth/me, поэтому пользователя из ответа на вход храним рядом с токеном
+function loadUser(): authApi.User | null {
+  if (!getToken()) return null
+  try {
+    return JSON.parse(localStorage.getItem(USER_KEY) ?? 'null')
+  } catch {
+    return null
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
-  const [user, setUser] = useState<authApi.User | null>(null)
-  // если токен уже есть - сначала проверяем его, потом показываем страницы
-  const [loading, setLoading] = useState(() => getToken() !== null)
+  const [user, setUser] = useState<authApi.User | null>(loadUser)
 
   const logout = useCallback(() => {
     setToken(null)
+    localStorage.removeItem(USER_KEY)
     setUser(null)
     navigate('/login', { replace: true })
   }, [navigate])
 
+  // если токен протух, первый же запрос вернёт 401 и apiFetch вызовет logout
   useEffect(() => {
     setUnauthorizedHandler(logout)
     return () => setUnauthorizedHandler(null)
   }, [logout])
 
-  // восстановление сессии после обновления страницы
-  useEffect(() => {
-    if (!getToken()) return
-    authApi
-      .getMe()
-      .then(setUser)
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false))
-  }, [])
+  function start(session: authApi.Session) {
+    setToken(session.access_token)
+    localStorage.setItem(USER_KEY, JSON.stringify(session.user))
+    setUser(session.user)
+  }
 
   async function login(email: string, password: string) {
-    const token = await authApi.login(email, password)
-    setToken(token)
-    try {
-      setUser(await authApi.getMe())
-    } catch (err) {
-      setToken(null)
-      throw err
-    }
+    start(await authApi.login(email, password))
   }
 
   async function register(email: string, password: string) {
-    await authApi.register(email, password)
-    await login(email, password)
+    start(await authApi.register(email, password))
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   )
