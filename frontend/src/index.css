@@ -236,3 +236,16 @@ a {
   align-items: center;
   gap: 10px;
 }
+
+.current-photo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.current-photo img {
+  width: 96px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 6px;
+}

@@ -130,6 +130,14 @@ export async function uploadPhoto(id: number, file: File): Promise<Property> {
   return toProperty(find(id, email), email)
 }
 
+export async function deletePhoto(id: number): Promise<Property> {
+  await delay()
+  const email = currentEmail()
+  checkEdit(find(id, email), email)
+  save(load().map((p) => (p.id === id ? { ...p, photo_url: null } : p)))
+  return toProperty(find(id, email), email)
+}
+
 export async function archiveProperty(id: number): Promise<void> {
   await delay()
   const email = currentEmail()

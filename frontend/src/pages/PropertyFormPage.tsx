@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router'
 import { errorMessage } from '../api/client.ts'
 import {
   createProperty,
+  deletePhoto,
   getProperty,
   updateProperty,
   uploadPhoto,
@@ -43,6 +44,7 @@ function PropertyForm({ property }: { property?: Property }) {
     property ? { name: property.name, address: property.address, description: property.description } : EMPTY,
   )
   const [photo, setPhoto] = useState<File | null>(null)
+  const [removePhoto, setRemovePhoto] = useState(false)
   const [nameError, setNameError] = useState<string>()
   const [serverError, setServerError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -64,6 +66,7 @@ function PropertyForm({ property }: { property?: Property }) {
       const data = { ...values, name: values.name.trim() }
       const saved = property ? await updateProperty(property.id, data) : await createProperty(data)
       if (photo) await uploadPhoto(saved.id, photo)
+      else if (removePhoto) await deletePhoto(saved.id)
       // карточка заново загрузит объект с сервера, поэтому покажет актуальные данные
       navigate(`/properties/${saved.id}`)
     } catch (err) {
@@ -80,8 +83,24 @@ function PropertyForm({ property }: { property?: Property }) {
         <FormField label="Название" type="text" value={values.name} error={nameError} onChange={change('name')} />
         <FormField label="Адрес" type="text" value={values.address} onChange={change('address')} />
         <FormField label="Описание" type="text" value={values.description} onChange={change('description')} />
+        {property?.photo_url && !removePhoto && (
+          <div className="current-photo">
+            <img src={property.photo_url} alt="" />
+            <button type="button" className="button secondary" onClick={() => setRemovePhoto(true)}>
+              Удалить фото
+            </button>
+          </div>
+        )}
+        {removePhoto && (
+          <p className="empty">
+            Фото будет удалено после сохранения.{' '}
+            <button type="button" className="link-button" onClick={() => setRemovePhoto(false)}>
+              Отменить
+            </button>
+          </p>
+        )}
         <label className="field">
-          <span>Фото</span>
+          <span>{property?.photo_url ? 'Новое фото' : 'Фото'}</span>
           <input type="file" accept="image/*" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
         </label>
         {serverError && <p className="form-error">{serverError}</p>}

@@ -56,6 +56,11 @@ export function uploadPhoto(id: number, file: File): Promise<Property> {
   return apiFetch<Property>(`/properties/${id}/photo`, { method: 'POST', body })
 }
 
+export function deletePhoto(id: number): Promise<Property> {
+  if (isMock) return mock.deletePhoto(id)
+  return apiFetch<Property>(`/properties/${id}/photo`, { method: 'DELETE' })
+}
+
 export function archiveProperty(id: number): Promise<void> {
   if (isMock) return mock.archiveProperty(id)
   return apiFetch<void>(`/properties/${id}/archive`, { method: 'POST' })
