@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 
+from app.api.agreements import router as agreements_router
 from app.api.auth import router as auth_router
 from app.api.health import router as health_router
 from app.api.memberships import router as memberships_router
@@ -11,5 +12,6 @@ app = FastAPI(title=settings.app_name, debug=settings.debug)
 register_exception_handlers(app)
 app.include_router(health_router)
 app.include_router(auth_router)
+app.include_router(agreements_router)
 app.include_router(properties_router)
 app.include_router(memberships_router)
