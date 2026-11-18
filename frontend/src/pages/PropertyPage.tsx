@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { errorMessage } from '../api/client.ts'
-import { archiveProperty, getProperty, type Property } from '../api/properties.ts'
+import { archiveProperty, canEdit, getProperty, type Property } from '../api/properties.ts'
 import HouseIcon from '../components/HouseIcon.tsx'
 import ShareBar from '../components/ShareBar.tsx'
 
@@ -55,15 +55,15 @@ function PropertyPage() {
         </div>
         <div className="card-body">
           <h1>{property.name}</h1>
-          <p className="muted">{property.address || 'Адрес не указан'}</p>
+          <p className="muted">{property.property_type}</p>
           {property.description && <p>{property.description}</p>}
 
           <div className="share-block">
             <span className="share-label">Ваша доля</span>
-            <ShareBar share={property.my_share} />
+            <ShareBar share={property.ownership_share} />
           </div>
 
-          {property.can_edit && (
+          {canEdit(property) && (
             <div className="actions">
               <Link className="button" to={`/properties/${id}/edit`}>
                 Редактировать

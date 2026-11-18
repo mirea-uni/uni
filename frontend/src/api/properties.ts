@@ -1,37 +1,47 @@
 import { apiFetch } from './client.ts'
 import * as mock from './mockProperties.ts'
 
+// поля как в PropertyResponse на бэке (app/api/properties.py)
 export interface Property {
   id: number
   name: string
-  address: string
-  description: string
+  description: string | null
+  property_type: string
   photo_url: string | null
-  my_share: number
-  can_edit: boolean
+  ownership_share: number
+  can_edit?: boolean
 }
 
 export interface PropertyInput {
   name: string
-  address: string
-  description: string
+  description: string | null
+  property_type: string
+  photo_url: string | null
 }
 
-export interface Page<T> {
-  items: T[]
-  total: number
-  page: number
-  size: number
+export interface PropertyPage {
+  items: Property[]
+  hasNext: boolean
 }
-
-// пока нет API имущества (UNI-42) работает на моке, как и авторизация
-const isMock = import.meta.env.VITE_USE_MOCK === 'true'
 
 export const PAGE_SIZE = 10
 
-export function listProperties(page: number): Promise<Page<Property>> {
-  if (isMock) return mock.listProperties(page, PAGE_SIZE)
-  return apiFetch<Page<Property>>(`/properties?page=${page}&size=${PAGE_SIZE}`)
+export const PROPERTY_TYPES = ['Квартира', 'Дом', 'Дача', 'Автомобиль', 'Другое']
+
+const isMock = import.meta.env.VITE_USE_MOCK === 'true'
+
+// бэк пока не отдаёт права (замечание в PR #13), до этого кнопки видят все совладельцы
+export function canEdit(property: Property): boolean {
+  return property.can_edit ?? true
+}
+
+export async function listProperties(page: number): Promise<PropertyPage> {
+  const offset = (page - 1) * PAGE_SIZE
+  // бэк не отдаёт общее количество, поэтому просим на один объект больше, чтобы понять, есть ли следующая страница
+  const items = isMock
+    ? await mock.listProperties(offset, PAGE_SIZE + 1)
+    : await apiFetch<Property[]>(`/properties?offset=${offset}&limit=${PAGE_SIZE + 1}`)
+  return { items: items.slice(0, PAGE_SIZE), hasNext: items.length > PAGE_SIZE }
 }
 
 export function getProperty(id: number): Promise<Property> {
@@ -49,19 +59,7 @@ export function updateProperty(id: number, data: PropertyInput): Promise<Propert
   return apiFetch<Property>(`/properties/${id}`, { method: 'PATCH', body: JSON.stringify(data) })
 }
 
-export function uploadPhoto(id: number, file: File): Promise<Property> {
-  if (isMock) return mock.uploadPhoto(id, file)
-  const body = new FormData()
-  body.append('file', file)
-  return apiFetch<Property>(`/properties/${id}/photo`, { method: 'POST', body })
-}
-
-export function deletePhoto(id: number): Promise<Property> {
-  if (isMock) return mock.deletePhoto(id)
-  return apiFetch<Property>(`/properties/${id}/photo`, { method: 'DELETE' })
-}
-
 export function archiveProperty(id: number): Promise<void> {
   if (isMock) return mock.archiveProperty(id)
-  return apiFetch<void>(`/properties/${id}/archive`, { method: 'POST' })
+  return apiFetch<void>(`/properties/${id}`, { method: 'DELETE' })
 }

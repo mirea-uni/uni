@@ -209,7 +209,8 @@ a {
   font-weight: 600;
 }
 
-.field input {
+.field input,
+.field select {
   padding: 11px 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -218,13 +219,15 @@ a {
   font-weight: 400;
 }
 
-.field input:focus {
+.field input:focus,
+.field select:focus {
   border-color: var(--pine);
   outline: none;
   box-shadow: 0 0 0 3px var(--moss);
 }
 
-.field input[aria-invalid='true'] {
+.field input[aria-invalid='true'],
+.field select[aria-invalid='true'] {
   border-color: var(--danger);
 }
 

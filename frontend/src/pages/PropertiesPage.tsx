@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { errorMessage } from '../api/client.ts'
-import { listProperties, PAGE_SIZE, type Page, type Property } from '../api/properties.ts'
+import { listProperties, type PropertyPage } from '../api/properties.ts'
 import HouseIcon from '../components/HouseIcon.tsx'
 import ShareBar from '../components/ShareBar.tsx'
 
 interface Result {
   page: number
-  data?: Page<Property>
+  data?: PropertyPage
   error?: string
 }
 
@@ -28,15 +28,11 @@ function PropertiesPage() {
   }, [page])
 
   const loading = result?.page !== page
-  const pages = result?.data ? Math.max(1, Math.ceil(result.data.total / PAGE_SIZE)) : 1
 
   return (
     <section>
       <div className="page-header">
-        <div>
-          <h1>Моё имущество</h1>
-          {result?.data && <p className="muted">Объектов: {result.data.total}</p>}
-        </div>
+        <h1>Моё имущество</h1>
         <Link className="button" to="/properties/new">
           Добавить объект
         </Link>
@@ -44,7 +40,7 @@ function PropertiesPage() {
 
       {loading && <p>Загрузка...</p>}
       {!loading && result?.error && <p className="form-error">{result.error}</p>}
-      {!loading && result?.data?.items.length === 0 && (
+      {!loading && result?.data?.items.length === 0 && page === 1 && (
         <div className="empty-state">
           <HouseIcon size={56} />
           <p>У вас пока нет объектов</p>
@@ -52,7 +48,7 @@ function PropertiesPage() {
         </div>
       )}
 
-      {!loading && result?.data && result.data.items.length > 0 && (
+      {!loading && result?.data && (result.data.items.length > 0 || page > 1) && (
         <>
           <ul className="property-list">
             {result.data.items.map((p) => (
@@ -61,22 +57,20 @@ function PropertiesPage() {
                   <div className="row-photo">{p.photo_url ? <img src={p.photo_url} alt="" /> : <HouseIcon size={28} />}</div>
                   <div className="row-info">
                     <strong>{p.name}</strong>
-                    <span>{p.address || 'Адрес не указан'}</span>
+                    <span>{p.property_type}</span>
                   </div>
-                  <ShareBar share={p.my_share} compact />
+                  <ShareBar share={p.ownership_share} compact />
                 </Link>
               </li>
             ))}
           </ul>
-          {pages > 1 && (
+          {(page > 1 || result.data.hasNext) && (
             <div className="pagination">
               <button type="button" disabled={page <= 1} onClick={() => setParams({ page: String(page - 1) })}>
                 Назад
               </button>
-              <span>
-                Страница {page} из {pages}
-              </span>
-              <button type="button" disabled={page >= pages} onClick={() => setParams({ page: String(page + 1) })}>
+              <span>Страница {page}</span>
+              <button type="button" disabled={!result.data.hasNext} onClick={() => setParams({ page: String(page + 1) })}>
                 Вперёд
               </button>
             </div>

@@ -2,17 +2,23 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { errorMessage } from '../api/client.ts'
 import {
+  canEdit,
   createProperty,
-  deletePhoto,
   getProperty,
+  PROPERTY_TYPES,
   updateProperty,
-  uploadPhoto,
   type Property,
-  type PropertyInput,
 } from '../api/properties.ts'
 import FormField from '../components/FormField.tsx'
 
-const EMPTY: PropertyInput = { name: '', address: '', description: '' }
+interface FormValues {
+  name: string
+  property_type: string
+  description: string
+  photo_url: string
+}
+
+const EMPTY: FormValues = { name: '', property_type: '', description: '', photo_url: '' }
 
 function PropertyFormPage() {
   const params = useParams()
@@ -34,40 +40,51 @@ function PropertyFormPage() {
   if (id === null) return <PropertyForm />
   if (loaded?.id !== id) return <p>Загрузка...</p>
   if (!loaded.data) return <p className="form-error">{loaded.error}</p>
-  if (!loaded.data.can_edit) return <p className="form-error">Недостаточно прав для редактирования</p>
+  if (!canEdit(loaded.data)) return <p className="form-error">Недостаточно прав для редактирования</p>
   return <PropertyForm property={loaded.data} />
 }
 
 function PropertyForm({ property }: { property?: Property }) {
   const navigate = useNavigate()
-  const [values, setValues] = useState<PropertyInput>(
-    property ? { name: property.name, address: property.address, description: property.description } : EMPTY,
+  const [values, setValues] = useState<FormValues>(
+    property
+      ? {
+          name: property.name,
+          property_type: property.property_type,
+          description: property.description ?? '',
+          photo_url: property.photo_url ?? '',
+        }
+      : EMPTY,
   )
-  const [photo, setPhoto] = useState<File | null>(null)
-  const [removePhoto, setRemovePhoto] = useState(false)
   const [nameError, setNameError] = useState<string>()
+  const [typeError, setTypeError] = useState<string>()
   const [serverError, setServerError] = useState('')
   const [saving, setSaving] = useState(false)
 
-  function change(field: keyof PropertyInput) {
-    return (value: string) => setValues((v) => ({ ...v, [field]: value }))
+  function change(field: keyof FormValues) {
+    return (value: string) => {
+      setValues((v) => ({ ...v, [field]: value }))
+      if (field === 'name') setNameError(undefined)
+      if (field === 'property_type') setTypeError(undefined)
+    }
   }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    if (!values.name.trim()) {
-      setNameError('Введите название')
-      return
-    }
-    setNameError(undefined)
+    const name = values.name.trim()
+    setNameError(name ? undefined : 'Введите название')
+    setTypeError(values.property_type ? undefined : 'Выберите тип')
+    if (!name || !values.property_type) return
     setSaving(true)
     setServerError('')
     try {
-      const data = { ...values, name: values.name.trim() }
+      const data = {
+        name,
+        property_type: values.property_type,
+        description: values.description.trim() || null,
+        photo_url: values.photo_url.trim() || null,
+      }
       const saved = property ? await updateProperty(property.id, data) : await createProperty(data)
-      if (photo) await uploadPhoto(saved.id, photo)
-      else if (removePhoto) await deletePhoto(saved.id)
-      // карточка заново загрузит объект с сервера, поэтому покажет актуальные данные
       navigate(`/properties/${saved.id}`)
     } catch (err) {
       setServerError(errorMessage(err, 'Не удалось сохранить объект'))
@@ -83,28 +100,33 @@ function PropertyForm({ property }: { property?: Property }) {
       <h1>{property ? 'Редактирование объекта' : 'Новый объект'}</h1>
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
         <FormField label="Название" type="text" value={values.name} error={nameError} onChange={change('name')} />
-        <FormField label="Адрес" type="text" value={values.address} onChange={change('address')} />
+        <label className="field">
+          <span>Тип</span>
+          <select
+            value={values.property_type}
+            onChange={(e) => change('property_type')(e.target.value)}
+            aria-invalid={Boolean(typeError)}
+          >
+            <option value="">Выберите тип</option>
+            {PROPERTY_TYPES.map((t) => (
+              <option key={t}>{t}</option>
+            ))}
+            {values.property_type && !PROPERTY_TYPES.includes(values.property_type) && (
+              <option>{values.property_type}</option>
+            )}
+          </select>
+          {typeError && <span className="field-error">{typeError}</span>}
+        </label>
         <FormField label="Описание" type="text" value={values.description} onChange={change('description')} />
-        {property?.photo_url && !removePhoto && (
+        <FormField label="Ссылка на фото" type="url" value={values.photo_url} onChange={change('photo_url')} />
+        {values.photo_url.trim() && (
           <div className="current-photo">
-            <img src={property.photo_url} alt="" />
-            <button type="button" className="button secondary" onClick={() => setRemovePhoto(true)}>
+            <img src={values.photo_url.trim()} alt="" />
+            <button type="button" className="button secondary" onClick={() => change('photo_url')('')}>
               Удалить фото
             </button>
           </div>
         )}
-        {removePhoto && (
-          <p className="empty">
-            Фото будет удалено после сохранения.{' '}
-            <button type="button" className="link-button" onClick={() => setRemovePhoto(false)}>
-              Отменить
-            </button>
-          </p>
-        )}
-        <label className="field">
-          <span>{property?.photo_url ? 'Новое фото' : 'Фото'}</span>
-          <input type="file" accept="image/*" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
-        </label>
         {serverError && <p className="form-error">{serverError}</p>}
         <button type="submit" disabled={saving}>
           {saving ? 'Сохраняем...' : property ? 'Сохранить изменения' : 'Добавить объект'}
