@@ -1,0 +1,56 @@
+"""Distribution of available days between co-owners of a property."""
+
+import calendar
+from collections.abc import Mapping
+from decimal import Decimal
+
+Share = int | Decimal
+
+
+def _check_shares(shares: Mapping[str, Share]) -> None:
+    if not shares:
+        raise ValueError("property has no owners")
+    if any(share < 0 for share in shares.values()):
+        raise ValueError("share cannot be negative")
+    if sum(shares.values()) != 100:
+        raise ValueError("shares must sum to 100")
+
+
+def allocate_days(
+    year: int, month: int, shares: Mapping[str, Share], blocked_days: int = 0
+) -> dict[str, int]:
+    """Split days of the month between owners proportionally to their shares (in percent)."""
+    _check_shares(shares)
+    month_days = calendar.monthrange(year, month)[1]
+    if not 0 <= blocked_days <= month_days:
+        raise ValueError("blocked days must be between 0 and month length")
+    days = month_days - blocked_days
+    result = {owner: int(days * share // 100) for owner, share in shares.items()}
+    # leftover days go to owners with the biggest fractional part,
+    # if it is equal - to the owner with the bigger share
+    remainders = {owner: days * share % 100 for owner, share in shares.items()}
+    left = days - sum(result.values())
+    order = sorted(shares, key=lambda o: (remainders[o], shares[o]), reverse=True)
+    for owner in order[:left]:
+        result[owner] += 1
+    return result
+
+
+def allocate_year(year: int, shares: Mapping[str, Share]) -> dict[int, dict[str, int]]:
+    _check_shares(shares)
+    owners = list(shares)
+    result: dict[int, dict[str, int]] = {}
+    for month in range(1, 13):
+        # change owners order every month, so on a tie the extra day goes to different people
+        shift = (month - 1) % len(owners)
+        rotated = {owner: shares[owner] for owner in owners[shift:] + owners[:shift]}
+        result[month] = allocate_days(year, month, rotated)
+    return result
+
+
+def year_totals(year: int, shares: Mapping[str, Share]) -> dict[str, int]:
+    totals = dict.fromkeys(shares, 0)
+    for month_result in allocate_year(year, shares).values():
+        for owner, days in month_result.items():
+            totals[owner] += days
+    return totals
