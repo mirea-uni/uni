@@ -77,7 +77,9 @@ function PropertyForm({ property }: { property?: Property }) {
 
   return (
     <section className="auth">
-      <Link to={property ? `/properties/${property.id}` : '/properties'}>← Назад</Link>
+      <Link className="back" to={property ? `/properties/${property.id}` : '/properties'}>
+        {property ? 'К объекту' : 'К списку объектов'}
+      </Link>
       <h1>{property ? 'Редактирование объекта' : 'Новый объект'}</h1>
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
         <FormField label="Название" type="text" value={values.name} error={nameError} onChange={change('name')} />
@@ -105,7 +107,7 @@ function PropertyForm({ property }: { property?: Property }) {
         </label>
         {serverError && <p className="form-error">{serverError}</p>}
         <button type="submit" disabled={saving}>
-          {saving ? 'Сохраняем...' : 'Сохранить'}
+          {saving ? 'Сохраняем...' : property ? 'Сохранить изменения' : 'Добавить объект'}
         </button>
       </form>
     </section>

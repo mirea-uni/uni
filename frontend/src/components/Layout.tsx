@@ -7,7 +7,10 @@ function Layout() {
   return (
     <div className="layout">
       <header className="header">
-        <span className="logo">Квиты</span>
+        <NavLink to="/" className="logo">
+          <span className="logo-mark" aria-hidden="true" />
+          Квиты
+        </NavLink>
         <nav className="nav">
           {user ? (
             <>

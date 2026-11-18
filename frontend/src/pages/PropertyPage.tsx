@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { errorMessage } from '../api/client.ts'
 import { archiveProperty, getProperty, type Property } from '../api/properties.ts'
+import HouseIcon from '../components/HouseIcon.tsx'
+import ShareBar from '../components/ShareBar.tsx'
 
 interface Result {
   id: number
@@ -45,43 +47,47 @@ function PropertyPage() {
   }
 
   return (
-    <section className="property-card">
-      <Link to="/properties">← К списку</Link>
-      <h1>{property.name}</h1>
-      {property.photo_url && <img className="property-photo" src={property.photo_url} alt={property.name} />}
-      <p>
-        <b>Адрес:</b> {property.address || '—'}
-      </p>
-      <p>
-        <b>Описание:</b> {property.description || '—'}
-      </p>
-      <p>
-        <b>Ваша доля:</b> {property.my_share}%
-      </p>
-
-      {property.can_edit && (
-        <div className="actions">
-          <Link className="button" to={`/properties/${id}/edit`}>
-            Редактировать
-          </Link>
-          {!confirming ? (
-            <button type="button" className="button danger" onClick={() => setConfirming(true)}>
-              В архив
-            </button>
-          ) : (
-            <span className="confirm">
-              Убрать объект в архив?
-              <button type="button" className="button danger" disabled={archiving} onClick={handleArchive}>
-                Да
-              </button>
-              <button type="button" className="button secondary" onClick={() => setConfirming(false)}>
-                Отмена
-              </button>
-            </span>
-          )}
+    <section>
+      <Link className="back" to="/properties">К списку объектов</Link>
+      <div className="property-card">
+        <div className="card-photo">
+          {property.photo_url ? <img src={property.photo_url} alt={property.name} /> : <HouseIcon size={72} />}
         </div>
-      )}
-      {actionError && <p className="form-error">{actionError}</p>}
+        <div className="card-body">
+          <h1>{property.name}</h1>
+          <p className="muted">{property.address || 'Адрес не указан'}</p>
+          {property.description && <p>{property.description}</p>}
+
+          <div className="share-block">
+            <span className="share-label">Ваша доля</span>
+            <ShareBar share={property.my_share} />
+          </div>
+
+          {property.can_edit && (
+            <div className="actions">
+              <Link className="button" to={`/properties/${id}/edit`}>
+                Редактировать
+              </Link>
+              {!confirming ? (
+                <button type="button" className="button danger" onClick={() => setConfirming(true)}>
+                  В архив
+                </button>
+              ) : (
+                <span className="confirm">
+                  Убрать объект в архив?
+                  <button type="button" className="button danger" disabled={archiving} onClick={handleArchive}>
+                    Да
+                  </button>
+                  <button type="button" className="button secondary" onClick={() => setConfirming(false)}>
+                    Отмена
+                  </button>
+                </span>
+              )}
+            </div>
+          )}
+          {actionError && <p className="form-error">{actionError}</p>}
+        </div>
+      </div>
     </section>
   )
 }

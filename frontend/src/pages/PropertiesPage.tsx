@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { errorMessage } from '../api/client.ts'
 import { listProperties, PAGE_SIZE, type Page, type Property } from '../api/properties.ts'
+import HouseIcon from '../components/HouseIcon.tsx'
+import ShareBar from '../components/ShareBar.tsx'
 
 interface Result {
   page: number
@@ -31,7 +33,10 @@ function PropertiesPage() {
   return (
     <section>
       <div className="page-header">
-        <h1>Моё имущество</h1>
+        <div>
+          <h1>Моё имущество</h1>
+          {result?.data && <p className="muted">Объектов: {result.data.total}</p>}
+        </div>
         <Link className="button" to="/properties/new">
           Добавить объект
         </Link>
@@ -40,7 +45,11 @@ function PropertiesPage() {
       {loading && <p>Загрузка...</p>}
       {!loading && result?.error && <p className="form-error">{result.error}</p>}
       {!loading && result?.data?.items.length === 0 && (
-        <p className="empty">У вас пока нет объектов. Добавьте первый или попросите совладельца пригласить вас.</p>
+        <div className="empty-state">
+          <HouseIcon size={56} />
+          <p>У вас пока нет объектов</p>
+          <span>Добавьте первый или попросите совладельца пригласить вас.</span>
+        </div>
       )}
 
       {!loading && result?.data && result.data.items.length > 0 && (
@@ -48,13 +57,13 @@ function PropertiesPage() {
           <ul className="property-list">
             {result.data.items.map((p) => (
               <li key={p.id}>
-                <Link to={`/properties/${p.id}`} className="property-item">
-                  {p.photo_url ? <img src={p.photo_url} alt="" /> : <div className="no-photo">нет фото</div>}
-                  <div className="property-info">
+                <Link to={`/properties/${p.id}`} className="property-row">
+                  <div className="row-photo">{p.photo_url ? <img src={p.photo_url} alt="" /> : <HouseIcon size={28} />}</div>
+                  <div className="row-info">
                     <strong>{p.name}</strong>
-                    <span>{p.address}</span>
+                    <span>{p.address || 'Адрес не указан'}</span>
                   </div>
-                  <span className="share">{p.my_share}%</span>
+                  <ShareBar share={p.my_share} compact />
                 </Link>
               </li>
             ))}
